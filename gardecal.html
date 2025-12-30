@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>V Semester SGPA Calculator</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    font-family: 'Inter', sans-serif;
+    color: #e5e7eb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.app {
+    width: 900px;
+    max-width: 95%;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(14px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    font-weight: 600;
+    color: #38bdf8;
+}
+
+.header p {
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.card {
+    background: rgba(2, 6, 23, 0.85);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.card h3 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #22c55e;
+    margin-bottom: 15px;
+}
+
+.subject {
+    margin-bottom: 14px;
+}
+
+.subject-title {
+    font-size: 13px;
+    color: #cbd5f5;
+    margin-bottom: 6px;
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+}
+
+input, select {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #334155;
+    background: #020617;
+    color: #fff;
+    font-size: 14px;
+}
+
+input::placeholder {
+    color: #64748b;
+}
+
+.grade-preview {
+    font-size: 12px;
+    margin-top: 4px;
+    color: #94a3b8;
+}
+
+select {
+    cursor: pointer;
+}
+
+.calculate {
+    margin-top: 30px;
+    width: 100%;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    color: #022c22;
+    box-shadow: 0 10px 30px rgba(34,197,94,0.35);
+}
+
+.calculate:hover {
+    transform: translateY(-1px);
+}
+
+.result {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 600;
+    color: #22c55e;
+}
+
+.footer {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 12px;
+    color: #64748b;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="header">
+    <h1>V Semester SGPA Calculator</h1>
+    <p>CBCS Scheme · Theory (30+70) · Labs (Grade Based)</p>
+</div>
+
+<div class="grid">
+
+<!-- THEORY -->
+<div class="card">
+<h3>Theory Subjects</h3>
+
+<div id="theory"></div>
+</div>
+
+<!-- LABS -->
+<div class="card">
+<h3>Laboratory Subjects</h3>
+
+<div class="subject">
+    <div class="subject-title">CN & OS Lab (1.5 Credits)</div>
+    <select id="l1">
+        <option value="10">S</option><option value="9">A</option>
+        <option value="8">B</option><option value="7">C</option>
+        <option value="6">D</option><option value="5">E</option>
+        <option value="0">F</option>
+    </select>
+</div>
+
+<div class="subject">
+    <div class="subject-title">AI Lab (1 Credit)</div>
+    <select id="l2">
+        <option value="10">S</option><option value="9">A</option>
+        <option value="8">B</option><option value="7">C</option>
+        <option value="6">D</option><option value="5">E</option>
+        <option value="0">F</option>
+    </select>
+</div>
+
+<div class="subject">
+    <div class="subject-title">Web App Dev Lab (1 Credit)</div>
+    <select id="l3">
+        <option value="10">S</option><option value="9">A</option>
+        <option value="8">B</option><option value="7">C</option>
+        <option value="6">D</option><option value="5">E</option>
+        <option value="0">F</option>
+    </select>
+</div>
+
+</div>
+</div>
+
+<button class="calculate" onclick="calculateSGPA()">Calculate SGPA</button>
+
+<div class="result" id="output"></div>
+
+<div class="footer">
+    Designed for MJCET · CBCS · Dark UI
+</div>
+
+</div>
+
+<script>
+const theorySubjects = [
+    "Automata Theory",
+    "Operating Systems",
+    "Artificial Intelligence",
+    "Computer Networks",
+    "Software Engineering",
+    "Professional Elective-I"
+];
+
+const theoryDiv = document.getElementById("theory");
+
+theorySubjects.forEach((name, i) => {
+    theoryDiv.innerHTML += `
+    <div class="subject">
+        <div class="subject-title">${name}</div>
+        <div class="row">
+            <input type="number" placeholder="Internal /30" id="ti${i}">
+            <input type="number" placeholder="External /70" id="te${i}">
+        </div>
+        <div class="grade-preview" id="g${i}">Total: 0 | Grade: -</div>
+    </div>`;
+});
+
+function theoryGP(t) {
+    if (t >= 90) return ["S",10];
+    if (t >= 80) return ["A",9];
+    if (t >= 70) return ["B",8];
+    if (t >= 60) return ["C",7];
+    if (t >= 50) return ["D",6];
+    if (t >= 40) return ["E",5];
+    return ["F",0];
+}
+
+document.addEventListener("input", () => {
+    for (let i = 0; i < 6; i++) {
+        let t = (+ti0.value||0); // dummy to avoid ref error
+        let ti = Number(document.getElementById(`ti${i}`).value || 0);
+        let te = Number(document.getElementById(`te${i}`).value || 0);
+        let total = ti + te;
+        let [g] = theoryGP(total);
+        document.getElementById(`g${i}`).innerText =
+            `Total: ${total} | Grade: ${g}`;
+    }
+});
+
+function calculateSGPA() {
+    let points = 0;
+
+    for (let i = 0; i < 6; i++) {
+        let ti = Number(document.getElementById(`ti${i}`).value || 0);
+        let te = Number(document.getElementById(`te${i}`).value || 0);
+        let [, gp] = theoryGP(ti + te);
+        points += gp * 3;
+    }
+
+    points += Number(l1.value) * 1.5;
+    points += Number(l2.value) * 1;
+    points += Number(l3.value) * 1;
+
+    document.getElementById("output").innerHTML =
+        `🎓 Expected SGPA : ${ (points / 21.5).toFixed(2) }`;
+}
+</script>
+
+</body>
+</html>
